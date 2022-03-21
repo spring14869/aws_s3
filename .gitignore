@@ -3,3 +3,4 @@
 /ssl
 .idea
 composer.lock
+env.php

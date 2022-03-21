@@ -1,20 +1,25 @@
 <?php
 include __DIR__ . DIRECTORY_SEPARATOR . 'services/AwsS3Client.php';
+include __DIR__ . DIRECTORY_SEPARATOR . 'env.php';
 
 class Files
 {
-    const BUCKET = 'marleychang.live-s3';
-
     private $act;
     private $s3client;
 
-    private $key = 'AKIAWRPXFQY3PKRLHM26';
-    private $secret = '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';
-    private $region = 'ap-northeast-1';
+    private $bucket;
+    private $region;
+    private $key;
+    private $secret;
 
     public function __construct($act)
     {
         session_start();
+        $this->bucket = S3_BUCKET;
+        $this->region = S3_REGION;
+        $this->key = IAM_KEY;
+        $this->secret = IAM_SECRET;
+
         $this->act = $act;
         $this->s3client = new AwsS3Client($this->key, $this->secret, $this->region);
     }
@@ -48,11 +53,11 @@ class Files
 
     public function index()
     {
-        $bucketName = static::BUCKET;
+        $bucketName = $this->bucket;
         $pageTitle = 'Bucket所有Objects';
 
         $objectsAry = [];
-        $objectsAry = $this->s3client->getBucketObjects(static::BUCKET);
+        $objectsAry = $this->s3client->getBucketObjects($bucketName);
 
         include 'views/files_index.php';
     }
@@ -61,7 +66,7 @@ class Files
     public function show()
     {
         $key = $_GET['key'];
-        $objectUrl = $this->s3client->getFileUrl(static::BUCKET, $key);
+        $objectUrl = $this->s3client->getFileUrl($this->bucket, $key);
 
         echo $objectUrl;
     }
@@ -97,7 +102,7 @@ class Files
 
         $fileSource = __DIR__ . DIRECTORY_SEPARATOR . $keyName;
 
-        $objects = $this->s3client->uploadFile(static::BUCKET, $keyName, $fileSource);
+        $objects = $this->s3client->uploadFile($this->bucket, $keyName, $fileSource);
 
         $_SESSION['success'] = '上傳結果：' . $objects;
 
@@ -109,7 +114,7 @@ class Files
     {
         $key = $_GET['key'];
 
-        $objects = $this->s3client->deleteFile(static::BUCKET, $key);
+        $objects = $this->s3client->deleteFile($this->bucket, $key);
 
         $_SESSION['success'] = '刪除結果：<pre>' . json_encode($objects);
 
