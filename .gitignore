@@ -1,0 +1,5 @@
+/vendor
+/images
+/ssl
+.idea
+composer.lock
